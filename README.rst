@@ -1,11 +1,6 @@
-Template for the Read the Docs tutorial
-=======================================
+Antenna Analyzer
+================
 
-This GitHub template includes fictional Python library
-with some basic Sphinx docs.
+Read the docs at:
 
-Read the tutorial here:
-
-https://docs.readthedocs.io/en/stable/tutorial/
-
-This is a test of automated building
+https://antenna-analyzer.readthedocs.io/en/latest/
