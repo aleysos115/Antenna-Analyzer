@@ -17,8 +17,8 @@ Tcl/Tk GUI on top.
 
 .. code-block:: shell
 
-    $ pip install sphinx sphinx-rtd-theme
-    $ sphinx-build -b html docs docs/_build/html
+    pip install sphinx sphinx-rtd-theme
+    sphinx-build -b html docs docs/_build/html
 
 
 Quickstart
@@ -28,8 +28,8 @@ No hardware needed to try it — a simulated instrument is included:
 
 .. code-block:: shell
 
-    $ tclsh mock/mockscope.tcl 5025 &
-    $ wish bin/antenna_analyzer.tcl
+    tclsh mock/mockscope.tcl 5025 &
+    wish bin/antenna_analyzer.tcl
 
 
 Connect to `127.0.0.1:5025`, calibrate, sweep. See 'docs/quickstart.rst <docs/quickstart.rst>'_ for the full walkthrough with
@@ -40,8 +40,8 @@ Layout
 
 .. code-block:: text
 
-    bin/antenna_analyzer.tcl   entry point: wish bin/antenna_analyzer.tcl
-    lib/                       instrument-free of Tk; usable from plain tclsh
+    bin/antenna_analyzer.tcl     entry point: wish bin/antenna_analyzer.tcl
+    lib/                         instrument-free of Tk; usable from plain tclsh
       complex.tcl                complex-number arithmetic
       dsp.tcl                    single-bin DFT phasor extraction (software lock-in)
       calib.tcl                  SOL calibration, Gamma -> Z/SWR/RL, Touchstone/CSV export
@@ -52,21 +52,22 @@ Layout
       app.tcl                    the application
       smith.tcl                  Smith chart canvas drawing
       plot.tcl                   XY line-plot canvas drawing
-    mock/mockscope.tcl         simulated scope+generator for development without hardware
+    mock/mockscope.tcl           simulated scope+generator for development without hardware
     tests/
       unit.test                  tcltest suite for lib/complex, dsp, calib
       mock_selftest.tcl          end-to-end test against mock/mockscope.tcl
-    docs/                       Sphinx documentation source (+ built HTML in docs/_build/html)
+    docs/                        Sphinx documentation source (+ built HTML in docs/_build/html)
 
 
 Running the tests
 -----------------
+unit.test : pure-math unit tests, no instrument needed
+mock_selftest.tcl : end-to-end test against the mock instrument
 
 .. code-block:: shell
 
-    $ tclsh tests/unit.test          # pure-math unit tests, no instrument needed
-    $ tclsh tests/mock_selftest.tcl  # end-to-end test against the mock instrument
-
+    tclsh tests/unit.test              
+    tclsh tests/mock_selftest.tcl  
 
 Status
 ------
