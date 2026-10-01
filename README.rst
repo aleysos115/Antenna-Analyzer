@@ -15,12 +15,8 @@ complex reflection coefficient (Γ), and reports impedance, SWR, and return
 loss for an antenna or any one-port device — entirely over SCPI, with a
 Tcl/Tk GUI on top.
 
-**Full documentation (architecture, schematics, calibration theory, SCPI
-reference, API reference, usage guide) is in `docs/` — see 'docs/_build/html/index.html <docs/_build/html/index.html>'_ for the built
-site, or build it yourself:**
-
-
 .. code-block:: shell
+
     $ pip install sphinx sphinx-rtd-theme
     $ sphinx-build -b html docs docs/_build/html
 
@@ -31,6 +27,7 @@ Quickstart
 No hardware needed to try it — a simulated instrument is included:
 
 .. code-block:: shell
+
     $ tclsh mock/mockscope.tcl 5025 &
     $ wish bin/antenna_analyzer.tcl
 
@@ -42,6 +39,7 @@ Layout
 ------
 
 .. code-block:: text
+
     bin/antenna_analyzer.tcl   entry point: wish bin/antenna_analyzer.tcl
     lib/                       instrument-free of Tk; usable from plain tclsh
       complex.tcl                complex-number arithmetic
@@ -65,6 +63,7 @@ Running the tests
 -----------------
 
 .. code-block:: shell
+
     $ tclsh tests/unit.test          # pure-math unit tests, no instrument needed
     $ tclsh tests/mock_selftest.tcl  # end-to-end test against the mock instrument
 
@@ -82,4 +81,4 @@ against a specific real DSO2000 unit's programmer's manual — see
 License
 -------
 
-MIT — see `LICENSE <LICENSE>`_.
+MIT — see `LICENSE <./LICENSE>`_.
