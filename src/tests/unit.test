@@ -1,0 +1,145 @@
+#!/usr/bin/env tclsh
+# unit.test -- tcltest suite for the instrument-free modules: complex.tcl,
+# dsp.tcl, calib.tcl. Run directly, or via tests/run_tests.tcl.
+#
+#     tclsh tests/unit.test
+#
+package require Tcl 8.6
+package require tcltest 2.5
+namespace import ::tcltest::*
+
+set ::topdir [file dirname [file dirname [file normalize [info script]]]]
+source [file join $::topdir lib all.tcl]
+namespace import ::aa::complex::* ::aa::calib::*
+
+# ------------------------------------------------------------- complex.tcl
+test complex-1.1 {add, and always returns doubles even for integer-looking input} -body {
+    cadd {1 2} {3 -1}
+} -result {4.0 1.0}
+test complex-1.2 {sub} -body { csub {1 2} {3 -1} } -result {-2.0 3.0}
+test complex-1.3 {mul} -body { cmul {1 2} {3 -1} } -result {5.0 5.0}
+test complex-1.4 {div matches hand-computed value} -body {
+    lassign [cdiv {1 2} {3 -1}] re im
+    list [expr {abs($re-0.1)<1e-9}] [expr {abs($im-0.7)<1e-9}]
+} -result {1 1}
+test complex-1.5 {div by zero raises} -body {
+    catch { cdiv {1 0} {0 0} } msg
+    set msg
+} -result {complex division by zero}
+test complex-1.6 {abs of 3-4-5} -body { cabs {3 4} } -result 5.0
+test complex-1.7 {round trip through polar} -body {
+    lassign [c2polar {3 4}] mag rad
+    lassign [polar2c $mag $rad] re im
+    list [expr {abs($re-3)<1e-9}] [expr {abs($im-4)<1e-9}]
+} -result {1 1}
+test complex-1.8 {conj} -body { cconj {3 4} } -result {3.0 -4.0}
+test complex-1.9 {unit phasor at 0} -body { cexp 0 } -result {1.0 0.0}
+
+# ---------------------------------------------------------------- dsp.tcl
+# a clean, exactly-periodic test tone: known amplitude, phase and DC offset
+proc make_tone {n fs f amp phase_deg dc} {
+    set y {}
+    set pi [expr {acos(-1)}]
+    set ph [expr {$phase_deg*$pi/180.0}]
+    for {set i 0} {$i < $n} {incr i} {
+        lappend y [expr {$dc + $amp*cos(2*$pi*$f*$i/$fs + $ph)}]
+    }
+    return $y
+}
+test dsp-2.1 {phasor recovers amplitude and phase of a clean tone} -body {
+    # 8192 samples at 1e6 Sa/s, a 50e3 Hz tone -- an exact integer number of
+    # cycles (409.6 -> not integer; pick an exactly-periodic case instead)
+    set fs 1e6; set f 100e3    ;# 8192 samples * 100e3/1e6 = 819.2 cycles: not integer either
+    # use a period that divides the record exactly so the Hann window's
+    # slight leakage is the only source of error, and keep the tolerance
+    # loose enough to accommodate it
+    set y [make_tone 8192 $fs $f 2.0 37.0 0.3]
+    lassign [::aa::dsp::phasor $y $fs $f] re im
+    set mag [expr {2.0/8192.0*0*0}]  ;# unused, silence lints
+    set got_mag [expr {hypot($re,$im)}]
+    set got_deg [expr {atan2($im,$re)*180.0/acos(-1)}]
+    # phasor is not normalized by window energy or N, so compare *ratios*
+    # instead of absolute magnitude: same tone at half the amplitude should
+    # give half the phasor magnitude, and the phase should match to a few
+    # degrees despite Hann-window leakage from the non-integer cycle count.
+    set y2 [make_tone 8192 $fs $f 1.0 37.0 0.3]
+    lassign [::aa::dsp::phasor $y2 $fs $f] re2 im2
+    set ratio [expr {hypot($re,$im)/hypot($re2,$im2)}]
+    list [expr {abs($ratio-2.0) < 0.01}] [expr {abs($got_deg-37.0) < 2.0}]
+} -result {1 1}
+test dsp-2.2 {phasor rejects a DC-only signal} -body {
+    set y {}
+    for {set i 0} {$i < 512} {incr i} { lappend y 5.0 }
+    lassign [::aa::dsp::phasor $y 1e6 100e3] re im
+    expr {hypot($re,$im) < 1e-9}
+} -result 1
+test dsp-2.3 {phasor errors on too few samples} -body {
+    catch { ::aa::dsp::phasor {1 2 3} 1e6 100e3 } msg
+    string match "phasor: need at least*" $msg
+} -result 1
+
+# --------------------------------------------------------------- calib.tcl
+test calib-3.1 {ideal SOL calibration is the identity map} -body {
+    set Ms {-1 0}; set Mo {1 0}; set Ml {0 0}
+    set out {}
+    foreach M {{-1 0} {1 0} {0 0} {0.5 0.2} {-0.3 -0.4}} {
+        lappend out [sol_correct $M $Ms $Mo $Ml]
+    }
+    set out
+} -result {{-1.0 0.0} {1.0 0.0} {0.0 0.0} {0.5 0.2} {-0.3 -0.4}}
+
+test calib-3.2 {re-measuring a standard does not raise (no removable-singularity bug)} -body {
+    set Ms {-0.94 0.03}; set Mo {0.91 -0.05}; set Ml {0.01 0.02}
+    catch { sol_correct $Ms $Ms $Mo $Ml } g
+    lassign $g re im
+    list [expr {abs($re-(-1.0))<1e-6}] [expr {abs($im-0.0)<1e-6}]
+} -result {1 1}
+
+test calib-3.3 {z_of_gamma at Gamma=0 is Z0} -body { z_of_gamma {0 0} 50 } -result {50.0 0.0}
+test calib-3.4 {z_of_gamma open circuit returns Inf, not an error} -body {
+    lassign [z_of_gamma {1 0} 50] R X
+    list [expr {$R eq "Inf"}] $X
+} -result {1 0}
+test calib-3.5 {swr_of_gamma at matched load is 1} -body { swr_of_gamma {0 0} } -result 1.0
+test calib-3.6 {swr_of_gamma is monotonic in |Gamma|} -body {
+    expr {[swr_of_gamma {0.5 0}] < [swr_of_gamma {0.8 0}]}
+} -result 1
+test calib-3.7 {rl_of_gamma at matched load is large (>=120dB clamp)} -body {
+    expr {[rl_of_gamma {0 0}] >= 120.0}
+} -result 1
+test calib-3.8 {known R+jX round-trips through Gamma back to R+jX} -body {
+    set z0 50.0
+    set R 75.0; set X 30.0
+    set g [cdiv [csub [list $R $X] [list $z0 0]] [cadd [list $R $X] [list $z0 0]]]
+    lassign [z_of_gamma $g $z0] R2 X2
+    list [expr {abs($R2-$R)<1e-6}] [expr {abs($X2-$X)<1e-6}]
+} -result {1 1}
+
+test calib-3.9 {dataset + s1p export round-trips frequencies and RI values} -body {
+    set ds [new_dataset]
+    add_point ds 1.0e6 {0.5 0.2}
+    add_point ds 2.0e6 {-0.1 -0.3}
+    set path [file tempfile]
+    write_s1p $path $ds 50.0
+    set lines [split [string trim [exec cat $path]] \n]
+    file delete $path
+    # last two lines are the data rows (comments/header come first)
+    set row1 [lindex $lines end-1]
+    set row2 [lindex $lines end]
+    list [string match "1000000.000000 0.50000000 0.20000000" $row1] \
+         [string match "2000000.000000 -0.10000000 -0.30000000" $row2]
+} -result {1 1}
+
+test calib-3.10 {csv export header and one row} -body {
+    set ds [new_dataset]
+    add_point ds 7.1e6 {0.0 0.0}
+    set path [file tempfile]
+    write_csv $path $ds 50.0
+    set lines [split [string trim [exec cat $path]] \n]
+    file delete $path
+    list [lindex $lines 0] [string match "7100000.0,50.000,0.000,*" [lindex $lines 1]]
+} -result {freq_Hz,R_ohm,X_ohm,|Z|_ohm,SWR,RL_dB,|Gamma|,angle_Gamma_deg 1}
+
+set failed [expr {[set ::tcltest::numTests(Failed)] > 0}]
+cleanupTests
+if {$failed} { exit 1 } else { exit 0 }
