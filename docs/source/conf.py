@@ -1,3 +1,5 @@
+import os
+import sys
 # Configuration file for the Sphinx documentation builder.
 
 # -- Project information
@@ -25,7 +27,28 @@ intersphinx_mapping = {
 }
 intersphinx_disabled_domains = ['std']
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "gen_schematic.py"]
+
+highlight_language = "tcl"
+pygments_style = "friendly"
+
+html_theme = "sphinx_rtd_theme"
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]
+html_title = "Tcl/Tk Antenna Analyzer"
+html_show_sourcelink = True
+
+html_theme_options = {
+    "collapse_navigation": False,
+    "navigation_depth": 3,
+    "titles_only": False,
+}
+
+rst_prolog = """
+.. role:: tcl(code)
+   :language: tcl
+"""
 
 # -- Options for HTML output
 

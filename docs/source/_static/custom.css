@@ -1,0 +1,5 @@
+/* small tweaks on top of sphinx_rtd_theme */
+.wy-nav-content { max-width: 960px; }
+code, .rst-content tt.literal, .rst-content code.literal { color: #a02040; }
+div.admonition.performance { border-color: #b07a2c; }
+div.admonition.performance > .admonition-title { background-color: #b07a2c; }
