@@ -112,4 +112,4 @@ Menus
 
 **File** duplicates the two export commands and Quit. **Instrument** offers
 a manual ``*RST`` and an ``*IDN?`` query (shown in a dialog) independent of
-the connection bar. **Help \u2192 About** shows the app name/version.
+the connection bar. **Help → About** shows the app name/version.

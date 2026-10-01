@@ -12,8 +12,7 @@ In one terminal:
 
 .. code-block:: console
 
-   $ tclsh mock/mockscope.tcl 5025
-   mockscope listening on 127.0.0.1:5025
+   tclsh src/mock/mockscope.tcl 5025
 
 This simulates a scope+generator with a ~7.1 MHz series-RLC "antenna" on its
 test port (see :doc:`testing` for what it models and why). It speaks the
@@ -28,7 +27,7 @@ In a second terminal:
 
 .. code-block:: console
 
-   $ wish bin/antenna_analyzer.tcl
+   wish src/bin/antenna_analyzer.tcl
 
 3. Connect
 ----------

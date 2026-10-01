@@ -28,8 +28,8 @@ No hardware needed to try it — a simulated instrument is included:
 
 .. code-block:: shell
 
-    tclsh mock/mockscope.tcl 5025 &
-    wish bin/antenna_analyzer.tcl
+    tclsh src/mock/mockscope.tcl 5025
+    wish src/bin/antenna_analyzer.tcl
 
 
 Connect to `127.0.0.1:5025`, calibrate, sweep. See 'docs/quickstart.rst <docs/quickstart.rst>'_ for the full walkthrough with
@@ -37,6 +37,7 @@ screenshots.
 
 Layout
 ------
+All the code is contained within the **src** folder.
 
 .. code-block:: text
 
@@ -62,12 +63,13 @@ Layout
 Running the tests
 -----------------
 unit.test : pure-math unit tests, no instrument needed
+
 mock_selftest.tcl : end-to-end test against the mock instrument
 
 .. code-block:: shell
 
-    tclsh tests/unit.test              
-    tclsh tests/mock_selftest.tcl  
+    tclsh src/tests/unit.test              
+    tclsh src/tests/mock_selftest.tcl  
 
 Status
 ------
