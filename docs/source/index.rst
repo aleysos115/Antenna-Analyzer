@@ -21,6 +21,10 @@ driving real test equipment from Tcl over SCPI -- transport, error-queue
 handling, binary IEEE-488.2 block transfers, synchronization -- wrapped in
 a usable GUI, start to finish.
 
+.. note::
+
+   This project is under active development.
+
 .. toctree::
    :maxdepth: 2
    :caption: Getting started

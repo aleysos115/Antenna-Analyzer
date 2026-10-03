@@ -15,12 +15,6 @@ complex reflection coefficient (Γ), and reports impedance, SWR, and return
 loss for an antenna or any one-port device — entirely over SCPI, with a
 Tcl/Tk GUI on top.
 
-.. code-block:: shell
-
-    pip install sphinx sphinx-rtd-theme
-    sphinx-build -b html docs docs/_build/html
-
-
 Quickstart
 ----------
 
@@ -80,6 +74,14 @@ for a real VNA. See `docs/performance.rst <docs/performance.rst>`_ for expected 
 mnemonics match the included mock instrument but have not been verified
 against a specific real DSO2000 unit's programmer's manual — see
 `docs/scpi_reference.rst <docs/scpi_reference.rst>`_ for adapting them.
+
+Staticly Building Documentation
+-------------------------------
+
+.. code-block:: shell
+
+    pip install sphinx sphinx-rtd-theme
+    sphinx-build -b html docs docs/_build/html
 
 License
 -------
